@@ -1,13 +1,12 @@
-const mysql = require('mysql2/promise');
-
-// Create a connection pool
+const mysql = require('mysql2');
 const pool = mysql.createPool({
-  host: 'localhost',
-  user: 'root',         // replace with your MySQL username
-  password: 'rishitha@2512', // replace with your MySQL password
-  database: 'echopay'   // replace with your database name
+  user: 'root',       // e.g., rishitha
+  password: 'rishitha@2512',
+  database: 'echopay',       // e.g., echopaydb
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
 });
-
 // Test the connection
 async function testConnection() {
   try {
