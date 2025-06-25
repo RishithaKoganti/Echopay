@@ -104,19 +104,14 @@ app.post('/login', async (req, res) => {
 // Main dashboard
 // Main dashboard
 app.get('/main', async (req, res) => {
-  if (!req.session.username) return res.redirect('/login'); // Ensure the user is logged in
+  if (!req.session.username) return res.redirect('/login');
 
   try {
-    // Step 1: Get current logged-in user's details
     const [userResult] = await pool.query('SELECT * FROM users WHERE username = ?', [req.session.username]);
     const user = userResult[0];
+    if (!user) return res.status(404).send('User not found');
 
-    if (!user) {
-      return res.status(404).send('User not found');
-    }
-
-    // Step 2: Get transactions where the user is sender or receiver
-    const [transactions] = await pool.query(`
+    let query = `
       SELECT 
         t.transaction_id,
         t.amount,
@@ -128,29 +123,53 @@ app.get('/main', async (req, res) => {
       FROM transactions t
       LEFT JOIN users sender ON t.sender_id = sender.user_id
       LEFT JOIN users receiver ON t.receiver_id = receiver.user_id
-      WHERE t.sender_id = ? OR t.receiver_id = ?
-      ORDER BY t.created_at DESC
-    `, [user.user_id, user.user_id]);
+      WHERE (t.sender_id = ? OR t.receiver_id = ?)
+    `;
 
-    // Step 3: Safely serialize transactions to avoid JSON issues
+    const queryParams = [user.user_id, user.user_id];
+    const queryPeriod = {};
+
+    // Apply date filter if both start and end are provided
+    const { start, end } = req.query;
+    if (start && end) {
+      const startDate = new Date(start);
+      const endDate = new Date(end);
+
+      // Validate dates
+      if (!isNaN(startDate.getTime()) && !isNaN(endDate.getTime()) && startDate <= endDate) {
+        query += ` AND DATE(t.created_at) BETWEEN ? AND ?`;
+        queryParams.push(start, end);
+        queryPeriod.start = start;
+        queryPeriod.end = end;
+      }
+    }
+
+    query += ` ORDER BY t.created_at DESC`;
+
+    const [transactions] = await pool.query(query, queryParams);
+
     const safeTransactions = transactions.map(t => ({
       transaction_id: t.transaction_id,
-      amount: t.amount,
+      amount: Number(t.amount),
       purpose: t.purpose,
       month: t.month,
-      created_at: t.created_at.toISOString(), // Convert Date to string
+      created_at: t.created_at.toISOString(),
       sender_name: t.sender_name,
       receiver_name: t.receiver_name
     }));
 
-    // Step 4: Pass safe data to EJS
-    res.render('main.ejs', { user, transactions: safeTransactions });
+    res.render('main.ejs', {
+      user,
+      transactions: safeTransactions,
+      queryPeriod: queryPeriod.start ? queryPeriod : null
+    });
 
   } catch (error) {
     console.error('Error fetching dashboard data:', error);
     res.status(500).send('Server error');
   }
 });
+
 
 // History
 app.get('/history', async (req, res) => {

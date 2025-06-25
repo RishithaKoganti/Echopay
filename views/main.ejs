@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Dashboard</title>
   <style>
     table {
@@ -21,22 +21,56 @@
     h1, h2 {
       text-align: center;
     }
-    /* Flex container for charts */
     .chart-container {
       display: flex;
-      justify-content: space-between; /* Evenly spaces the bar charts */
-      gap: 20px; /* Adds space between charts */
+      justify-content: space-between;
+      gap: 20px;
       margin-top: 40px;
     }
     .chart {
       width: 500px;
       height: 500px;
     }
-    /* Pie chart container below the bar charts */
     .pie-chart-container {
       text-align: center;
       height: 500px;
       width: 500px;
+      margin: 40px auto;
+    }
+    .filter-form {
+      max-width: 600px;
+      margin: 0 auto 30px;
+      padding: 20px;
+      border: 1px solid #ccc;
+      border-radius: 10px;
+      background-color: #f9f9f9;
+    }
+    .filter-form label {
+      display: block;
+      margin-bottom: 5px;
+    }
+    .filter-form input,
+    .filter-form select {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 15px;
+    }
+    .filter-form button {
+      width: 100%;
+      padding: 10px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    .filter-form button:hover {
+      background-color: #0056b3;
+    }
+    .notice {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 1.1rem;
+      color: #333;
     }
   </style>
 </head>
@@ -46,59 +80,74 @@
 
 <h1>Welcome, <%= user.username %>!</h1>
 
-<h2>Your Account Details</h2>
-<h4>Current Balance: ₹<%= Number(user.balance).toFixed(2) %></h4>
-<!-- Transaction table ends here -->
+<!-- Filter Form -->
+<div class="filter-form">
+  <form method="GET" action="/main">
+    <label for="start">From Date:</label>
+    <input type="date" id="start" name="start" required max="<%= new Date().toISOString().split('T')[0] %>">
 
+    <label for="end">To Date:</label>
+    <input type="date" id="end" name="end" required max="<%= new Date().toISOString().split('T')[0] %>">
+
+    <button type="submit">Filter Transactions</button>
+  </form>
+</div>
+
+<% if (queryPeriod) { %>
+  <div class="notice">
+    Showing transactions from <strong><%= queryPeriod.start %></strong> to <strong><%= queryPeriod.end %></strong>
+  </div>
+<% } %>
+
+<% if (transactions.length === 0) { %>
+  <div class="notice">No transactions found for the selected period.</div>
+<% } else { %>
 <h2 style="text-align: center; margin-top: 40px;">Charts</h2>
+
 <div class="chart-container">
-  <!-- Money Sent Bar Chart -->
+  <!-- Sent Bar Chart -->
   <div class="chart">
-    <h3 style="text-align: center;">Money Sent - Bar Chart</h3>
+    <h3 style="text-align: center;">Money Sent</h3>
     <canvas id="barChart"></canvas>
   </div>
 
-  <!-- Money Received Bar Chart -->
+  <!-- Received Bar Chart -->
   <div class="chart">
-    <h3 style="text-align: center;">Money Received - Bar Chart</h3>
+    <h3 style="text-align: center;">Money Received</h3>
     <canvas id="receivedBarChart"></canvas>
   </div>
 </div>
 
-<!-- Transaction Purposes Pie Chart -->
+<!-- Purpose Pie Chart -->
 <div class="pie-chart-container">
-  <h3>Transaction Purposes - Pie Chart</h3>
-  <canvas id="pieChart" ></canvas>
+  <h3>Transaction Purposes</h3>
+  <canvas id="pieChart"></canvas>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script>
-  // Pass transactions and user from server side
-  const allTransactions = JSON.parse(decodeURIComponent("<%= encodeURIComponent(JSON.stringify(transactions)) %>"));
+  const transactions = JSON.parse(decodeURIComponent("<%= encodeURIComponent(JSON.stringify(transactions)) %>"));
   const currentUser = "<%= user.username %>";
 
-  // Money Sent Bar Chart
-  const sentTransactions = allTransactions.filter(t => t.sender_name === currentUser);
-  const amountsByReceiver = {};
-  sentTransactions.forEach(transaction => {
-    const receiver = transaction.receiver_name;
-    if (!amountsByReceiver[receiver]) {
-      amountsByReceiver[receiver] = 0;
+  const sentMap = {}, receivedMap = {}, purposeMap = {};
+  transactions.forEach(t => {
+    if (t.sender_name === currentUser) {
+      sentMap[t.receiver_name] = (sentMap[t.receiver_name] || 0) + t.amount;
     }
-    amountsByReceiver[receiver] += transaction.amount;
+    if (t.receiver_name === currentUser) {
+      receivedMap[t.sender_name] = (receivedMap[t.sender_name] || 0) + t.amount;
+    }
+    const key = t.purpose || 'Unknown';
+    purposeMap[key] = (purposeMap[key] || 0) + t.amount;
   });
 
-  const receiverNames = Object.keys(amountsByReceiver);
-  const amounts = Object.values(amountsByReceiver);
-  const ctx = document.getElementById('barChart').getContext('2d');
-  new Chart(ctx, {
+  new Chart(document.getElementById('barChart').getContext('2d'), {
     type: 'bar',
     data: {
-      labels: receiverNames,
+      labels: Object.keys(sentMap),
       datasets: [{
         label: 'Amount Sent (₹)',
-        data: amounts,
+        data: Object.values(sentMap),
         backgroundColor: 'rgba(54, 162, 235, 0.7)',
         borderColor: 'rgba(54, 162, 235, 1)',
         borderWidth: 1
@@ -118,27 +167,13 @@
     }
   });
 
-  // Money Received Bar Chart
-  const receivedTransactions = allTransactions.filter(t => t.receiver_name === currentUser);
-  const amountsBySender = {};
-  receivedTransactions.forEach(transaction => {
-    const sender = transaction.sender_name;
-    if (!amountsBySender[sender]) {
-      amountsBySender[sender] = 0;
-    }
-    amountsBySender[sender] += transaction.amount;
-  });
-
-  const senderNames = Object.keys(amountsBySender);
-  const receivedAmounts = Object.values(amountsBySender);
-  const ctxReceived = document.getElementById('receivedBarChart').getContext('2d');
-  new Chart(ctxReceived, {
+  new Chart(document.getElementById('receivedBarChart').getContext('2d'), {
     type: 'bar',
     data: {
-      labels: senderNames,
+      labels: Object.keys(receivedMap),
       datasets: [{
         label: 'Amount Received (₹)',
-        data: receivedAmounts,
+        data: Object.values(receivedMap),
         backgroundColor: 'rgba(75, 192, 192, 0.7)',
         borderColor: 'rgba(75, 192, 192, 1)',
         borderWidth: 1
@@ -158,40 +193,19 @@
     }
   });
 
-  // Transaction Purposes Pie Chart
-</script>
-<script>
-  const userTransactions = allTransactions.filter(t => 
-    t.sender_name === currentUser || t.receiver_name === currentUser
-  );
-
-  const amountsByPurpose = {};
-  userTransactions.forEach(transaction => {
-    const purpose = transaction.purpose || "Unknown";
-    if (!amountsByPurpose[purpose]) {
-      amountsByPurpose[purpose] = 0;
-    }
-    amountsByPurpose[purpose] += transaction.amount;
-  });
-
-  const purposes = Object.keys(amountsByPurpose);
-  const amountsByPurposeValues = Object.values(amountsByPurpose);
-
-  const ctxPie = document.getElementById('pieChart').getContext('2d');
-  new Chart(ctxPie, {
+  new Chart(document.getElementById('pieChart').getContext('2d'), {
     type: 'pie',
     data: {
-      labels: purposes,
+      labels: Object.keys(purposeMap),
       datasets: [{
-        label: 'Amount by Purpose',
-        data: amountsByPurposeValues,
+        data: Object.values(purposeMap),
         backgroundColor: [
           'rgba(255, 99, 132, 0.6)',
           'rgba(54, 162, 235, 0.6)',
           'rgba(255, 206, 86, 0.6)',
           'rgba(75, 192, 192, 0.6)',
           'rgba(153, 102, 255, 0.6)',
-          'rgba(255, 159, 64, 0.6)',
+          'rgba(255, 159, 64, 0.6)'
         ],
         borderColor: [
           'rgba(255, 99, 132, 1)',
@@ -199,7 +213,7 @@
           'rgba(255, 206, 86, 1)',
           'rgba(75, 192, 192, 1)',
           'rgba(153, 102, 255, 1)',
-          'rgba(255, 159, 64, 1)',
+          'rgba(255, 159, 64, 1)'
         ],
         borderWidth: 1
       }]
@@ -207,26 +221,16 @@
     options: {
       responsive: true,
       plugins: {
-        legend: {
-          display: true,
-          position: 'top'
-        },
+        legend: { position: 'top' },
         tooltip: {
-          enabled: true,
           callbacks: {
-            label: function(context) {
-              const label = context.label || '';
-              const value = context.parsed || 0;
-              return `${label}: ₹${value.toFixed(2)}`;
-            }
+            label: ctx => `${ctx.label}: ₹${ctx.parsed.toFixed(2)}`
           }
         }
       }
     }
   });
 </script>
-
-<!-- <%- include('./layout/footer.ejs') %> -->
-
+<% } %>
 </body>
 </html>
