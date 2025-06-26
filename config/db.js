@@ -1,20 +1,23 @@
-const mysql = require('mysql2');
+const mysql = require('mysql2/promise');
+
 const pool = mysql.createPool({
-  user: 'root',       // e.g., rishitha
+  host: 'localhost',     // or your remote DB host
+  user: 'root',
   password: 'rishitha@2512',
-  database: 'echopay',       // e.g., echopaydb
+  database: 'echopay',
   waitForConnections: true,
   connectionLimit: 10,
   queueLimit: 0
 });
-// Test the connection
+
+// Optional: test connection safely
 async function testConnection() {
   try {
     const connection = await pool.getConnection();
-    console.log('Database connection established successfully');
+    console.log('✅ MySQL DB connected!');
     connection.release();
-  } catch (error) {
-    console.error('Database connection failed:', error);
+  } catch (err) {
+    console.error('❌ Database connection failed:', err.message);
   }
 }
 
