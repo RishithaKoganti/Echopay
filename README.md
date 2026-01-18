@@ -62,9 +62,7 @@ If a **visual analytics dashboard like EchoPay** were integrated directly into U
 - 🔁 **22% improvement** in **user retention**, as users feel more in control of their spending.
 - 🧠 **31% rise** in **financial awareness** among users when spending is visualized.
 
-## 🚀 Deployment
-
-- The application is currently under deployment.
-- Live link and hosting details will be updated soon!
+##Demostration Video of Echopay
+(https://drive.google.com/file/d/1gbI2zO8kio08YUl9CsBEM2D9HYmrw5T8/view?usp=drive_link)
 
 
