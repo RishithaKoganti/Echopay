@@ -1,115 +1,107 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Transaction History</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 20px;
-      background: #f4f4f4;
-    }
-
-    h1, h2 {
-      text-align: center;
-    }
-
-    .transactions-wrapper {
-      max-width: 900px;
-      margin: 30px auto;
-    }
-
-    .transaction-bar {
-      background-color: white;
-      border-radius: 8px;
-      margin-bottom: 15px;
-      padding: 16px 24px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    }
-
-    .left-info, .middle-info, .right-info {
-      flex: 1;
-    }
-
-    .middle-info {
-      text-align: center;
-    }
-
-    .right-info {
-      text-align: right;
-    }
-
-    .transaction-id {
-      font-size: 12px;
-      color: #999;
-    }
-
-    .amount {
-      font-size: 20px;
-      font-weight: bold;
-    }
-
-    .status-sent {
-      color: #e74c3c;
-      font-weight: bold;
-    }
-
-    .status-received {
-      color: #2ecc71;
-      font-weight: bold;
-    }
-
-    .meta {
-      font-size: 14px;
-      margin-top: 5px;
-    }
-
-    .purpose {
-      font-style: italic;
-      color: #666;
-    }
-
-  </style>
-</head>
-<body>
-
-<%- include('./layout/navbar.ejs') %>
-
-<h1>Hi, <%= user.username %>!</h1>
-<h2>Your Transaction History</h2>
-
-<% if (transactions.length === 0) { %>
-  <p style="text-align: center;">No transactions found.</p>
-<% } else { %>
-  <div class="transactions-wrapper">
-    <% transactions.forEach(transaction => { 
-         const isSent = transaction.sender_name === user.username;
-    %>
-      <div class="transaction-bar">
-        <div class="left-info">
-          <div class="transaction-id">Txn ID: <%= transaction.transaction_id %></div>
-          <div class="meta">
-            From: <%= transaction.sender_name %><br>
-            To: <%= transaction.receiver_name %>
-          </div>
-        </div>
-        <div class="middle-info">
-          <div class="amount">₹<%= Number(transaction.amount).toFixed(2) %></div>
-          <div class="purpose"><%= transaction.purpose %></div>
-        </div>
-        <div class="right-info">
-          <div class="<%= isSent ? 'status-sent' : 'status-received' %>">
-            <%= isSent ? 'Sent' : 'Received' %>
-          </div>
-          <div class="meta"><%= new Date(transaction.created_at).toLocaleString() %></div>
+<div class="container py-4">
+  <div class="glass-card p-4 shadow-lg">
+    <!-- Header -->
+    <div class="row align-items-center mb-4 gy-3">
+      <div class="col-md-6">
+        <h2 class="fw-extrabold mb-1"><i class="bi bi-clock-history text-primary me-2"></i>Transaction Ledger</h2>
+        <p class="text-secondary small mb-0">View all incoming and outgoing transfers associated with your account</p>
+      </div>
+      <!-- Local Instant Search -->
+      <div class="col-md-6 text-md-end">
+        <div class="input-group">
+          <span class="input-group-text bg-body-tertiary"><i class="bi bi-search text-muted"></i></span>
+          <input type="text" id="ledgerSearchInput" class="form-control bg-body-tertiary" placeholder="Search by recipient, sender, or purpose...">
         </div>
       </div>
-    <% }) %>
-  </div>
-<% } %>
+    </div>
 
-</body>
-</html>
+    <!-- Summary Count -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <span class="text-secondary small fw-semibold" id="ledgerSummaryText">Loading transactions...</span>
+    </div>
+
+    <!-- Table -->
+    <div class="table-responsive">
+      <table class="table align-middle" id="historyTable">
+        <thead>
+          <tr>
+            <th scope="col" class="text-secondary small fw-bold">Date & Time</th>
+            <th scope="col" class="text-secondary small fw-bold">Transaction ID</th>
+            <th scope="col" class="text-secondary small fw-bold">Type</th>
+            <th scope="col" class="text-secondary small fw-bold">Sender</th>
+            <th scope="col" class="text-secondary small fw-bold">Receiver</th>
+            <th scope="col" class="text-secondary small fw-bold">Purpose</th>
+            <th scope="col" class="text-secondary small fw-bold text-end">Amount</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (transactions.length === 0) { %>
+            <tr>
+              <td colspan="7" class="text-center py-5 text-secondary">
+                <i class="bi bi-clipboard-x display-4 d-block mb-2 text-muted"></i>
+                No transactions found. Go to "Send Money" to perform your first transaction!
+              </td>
+            </tr>
+          <% } else { %>
+            <% transactions.forEach(t => { 
+                 const isSent = t.sender_name === user.username;
+                 const formattedDate = new Date(t.created_at).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' });
+            %>
+              <tr class="ledger-row" data-search="<%= (t.sender_name + ' ' + t.receiver_name + ' ' + t.purpose).toLowerCase() %>">
+                <td><span class="small fw-semibold text-secondary"><%= formattedDate %></span></td>
+                <td><code class="small text-muted"><%= t.transaction_id %></code></td>
+                <td>
+                  <span class="badge <%= isSent ? 'bg-danger-subtle text-danger' : 'bg-success-subtle text-success' %> rounded-pill fw-semibold">
+                    <%= isSent ? 'Sent' : 'Received' %>
+                  </span>
+                </td>
+                <td><span class="fw-semibold"><%= t.sender_name %></span></td>
+                <td><span class="fw-semibold"><%= t.receiver_name %></span></td>
+                <td><span class="text-secondary small"><%= t.purpose %></span></td>
+                <td class="text-end fw-bold <%= isSent ? 'text-danger' : 'text-success' %>">
+                  <%= isSent ? '-' : '+' %>₹<%= Number(t.amount).toFixed(2) %>
+                </td>
+              </tr>
+            <% }) %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('ledgerSearchInput');
+    const rows = document.querySelectorAll('.ledger-row');
+    const summaryText = document.getElementById('ledgerSummaryText');
+
+    // Update total count initially
+    updateSummaryText(rows.length);
+
+    if (searchInput) {
+      searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.toLowerCase().trim();
+        let visibleCount = 0;
+
+        rows.forEach(row => {
+          const searchContent = row.getAttribute('data-search');
+          if (searchContent.includes(query)) {
+            row.classList.remove('d-none');
+            visibleCount++;
+          } else {
+            row.classList.add('d-none');
+          }
+        });
+
+        updateSummaryText(visibleCount);
+      });
+    }
+
+    function updateSummaryText(count) {
+      if (summaryText) {
+        summaryText.innerText = `Showing ${count} transaction${count === 1 ? '' : 's'}`;
+      }
+    }
+  });
+</script>

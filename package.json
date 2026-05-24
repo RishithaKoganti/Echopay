@@ -1,24 +1,27 @@
 {
-  "name": "minor",
+  "name": "echopay",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node app.js"
+    "start": "node app.js",
+    "dev": "nodemon app.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "description": "",
+  "description": "EchoPay - UPI Transaction Visualizer",
   "dependencies": {
-    "body-parser": "^2.2.0",
+    "bcrypt": "^5.1.1",
+    "connect-pg-simple": "^10.0.0",
+    "dotenv": "^16.4.5",
     "ejs": "^3.1.10",
     "express": "^5.1.0",
     "express-ejs-layouts": "^2.5.1",
     "express-session": "^1.18.1",
     "express-validator": "^7.2.1",
-    "mysql2": "^3.14.0",
     "nodemon": "^3.1.10",
+    "pg": "^8.12.0",
     "uuid": "^11.1.0"
   }
 }

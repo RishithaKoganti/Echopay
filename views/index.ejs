@@ -1,175 +1,119 @@
-<!DOCTYPE html>
-<html lang="en" class="h-100">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Echopay - <%= typeof title !== 'undefined' ? title : 'Payment Solution' %></title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="/css/style.css">
-</head>
-<body class="d-flex flex-column h-100">
-    <!-- Include the navbar -->
-    <%- include('./layout/navbar.ejs') %>
-    
-    <!-- Main content -->
-    <main class="flex-grow-1 bg-light">
-        <div class="container text-center py-5">
-            <h1 class="display-4 mb-4 fw-bold text-primary">Join us today</h1>
-            <a href="/signup" class="btn btn-primary btn-lg px-5 py-3 shadow mb-5">Join us</a>
-            
-            <!-- Charts Section -->
-            <div class="row mt-5">
-                <h2 class="text-center mb-4">User Account Statistics</h2>
-                
-                <!-- Bar Chart -->
-                <div class="col-md-6 mb-4">
-                    <div class="card shadow">
-                        <div class="card-header bg-primary text-white">
-                            <h5 class="mb-0">User Sent Amounts</h5>
-                        </div>
-                        <div class="card-body">
-                            <canvas id="barChart" width="400" height="300"></canvas>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Pie Chart (Replaces Line Chart) -->
-                <div class="col-md-6 mb-4">
-                    <div class="card shadow">
-                        <div class="card-header bg-primary text-white">
-                            <h5 class="mb-0">Purpose-wise Distribution</h5>
-                        </div>
-                        <div class="card-body">
-                            <canvas id="pieChart" width="400" height="300"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<!-- Hero Section -->
+<section class="py-5 text-center text-lg-start">
+  <div class="container">
+    <div class="row align-items-center gy-5">
+      <div class="col-lg-6">
+        <span class="badge bg-primary-subtle text-primary fw-bold px-3 py-2 mb-3 rounded-pill">Introducing EchoPay 1.0</span>
+        <h1 class="display-3 fw-extrabold mb-3">
+          Visualize Your <span class="text-gradient-primary">UPI Transactions</span> In Real Time
+        </h1>
+        <p class="lead text-secondary mb-4">
+          Say goodbye to boring text message logs and chaotic bank statements. EchoPay converts raw UPI transfer records into beautiful, interactive, and category-wise charts.
+        </p>
+        <div class="d-flex flex-wrap justify-content-center justify-content-lg-start gap-3">
+          <a href="/signup" class="btn btn-primary btn-lg px-4 py-3 btn-glow d-flex align-items-center">
+            Get Started Free <i class="bi bi-arrow-right-short ms-1 fs-4"></i>
+          </a>
+          <a href="/login" class="btn btn-outline-secondary btn-lg px-4 py-3">
+            Sign In Account
+          </a>
         </div>
-    </main>
+      </div>
+      <div class="col-lg-6">
+        <!-- Mock up Preview Panel -->
+        <div class="glass-card p-4 shadow-lg card-hover">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <span class="fw-bold text-muted"><i class="bi bi-pie-chart-fill text-primary me-2"></i>Mock Analytics Preview</span>
+            <span class="badge bg-success-subtle text-success">Live Demo</span>
+          </div>
+          <div class="chart-container-custom">
+            <canvas id="previewPieChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Core Features Section -->
+<section class="py-5 bg-body-tertiary">
+  <div class="container">
+    <div class="text-center mb-5">
+      <h2 class="h1 fw-bold">Why Choose <span class="text-gradient-primary">EchoPay</span>?</h2>
+      <p class="text-secondary max-w-350 mx-auto">Get complete transparency over your personal finances with visual analytics.</p>
+    </div>
     
-    <!-- Include the footer -->
-    <%- include('./layout/footer.ejs') %>
+    <div class="row g-4">
+      <div class="col-md-4">
+        <div class="glass-card p-4 h-100 card-hover shadow-sm">
+          <div class="fs-1 text-primary mb-3"><i class="bi bi-bar-chart-steps"></i></div>
+          <h4 class="fw-bold mb-2">Monthly Bar Charts</h4>
+          <p class="text-secondary mb-0">Track exact monthly spending changes over time to monitor trends and optimize budgets.</p>
+        </div>
+      </div>
+      
+      <div class="col-md-4">
+        <div class="glass-card p-4 h-100 card-hover shadow-sm">
+          <div class="fs-1 text-primary mb-3"><i class="bi bi-tags-fill"></i></div>
+          <h4 class="fw-bold mb-2">Purpose Categorization</h4>
+          <p class="text-secondary mb-0">Auto-organize your payments under Rent, Groceries, Travel, bills, or dining for clean category insights.</p>
+        </div>
+      </div>
+      
+      <div class="col-md-4">
+        <div class="glass-card p-4 h-100 card-hover shadow-sm">
+          <div class="fs-1 text-primary mb-3"><i class="bi bi-shield-check"></i></div>
+          <h4 class="fw-bold mb-2">Secure Transactions</h4>
+          <p class="text-secondary mb-0">Engineered with high security hashing, ACID-compliant ledger transfers, and secure serverless states.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Include Chart.js (from CDN) for Mock Render -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const ctx = document.getElementById('previewPieChart').getContext('2d');
     
-    <!-- Bootstrap JS Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- Chart.js Implementation -->
-    <script>
-        // Sample data for the charts
-        const users = ['John', 'Sarah', 'Michael', 'Emma', 'David'];
-        const balances = [5200, 3800, 9000, 4500, 7200];
-        
-        // Bar Chart
-        const barCtx = document.getElementById('barChart').getContext('2d');
-        const barChart = new Chart(barCtx, {
-            type: 'bar',
-            data: {
-                labels: users,
-                datasets: [{
-                    label: 'Sent Amount (₹)',
-                    data: balances,
-                    backgroundColor: [
-                        'rgba(54, 162, 235, 0.7)',
-                        'rgba(255, 99, 132, 0.7)',
-                        'rgba(75, 192, 192, 0.7)',
-                        'rgba(255, 206, 86, 0.7)',
-                        'rgba(153, 102, 255, 0.7)'
-                    ],
-                    borderColor: [
-                        'rgba(54, 162, 235, 1)',
-                        'rgba(255, 99, 132, 1)',
-                        'rgba(75, 192, 192, 1)',
-                        'rgba(255, 206, 86, 1)',
-                        'rgba(153, 102, 255, 1)'
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: 'Sent Amount (₹)'
-                        }
-                    },
-                    x: {
-                        title: {
-                            display: true,
-                            text: 'Users'
-                        }
-                    }
-                },
-                plugins: {
-                    legend: {
-                        display: false
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return `Sent: ₹${context.parsed.y.toLocaleString()}`;
-                            }
-                        }
-                    }
-                }
+    // Custom HSL gradients for Chart
+    new Chart(ctx, {
+      type: 'pie',
+      data: {
+        labels: ['Groceries', 'Rent', 'Bills & Utility', 'Entertainment', 'Travel'],
+        datasets: [{
+          label: 'Amount by Purpose',
+          data: [1500, 3500, 1200, 1800, 2000],
+          backgroundColor: [
+            'rgba(79, 70, 229, 0.75)',  // Indigo
+            'rgba(6, 182, 212, 0.75)',  // Cyan
+            'rgba(244, 63, 94, 0.75)',  // Rose
+            'rgba(251, 146, 60, 0.75)', // Orange
+            'rgba(16, 185, 129, 0.75)'  // Emerald
+          ],
+          borderColor: [
+            '#4f46e5', '#06b6d4', '#f43f5e', '#fb923c', '#10b981'
+          ],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: {
+              font: {
+                family: 'Outfit',
+                weight: 'bold'
+              },
+              boxWidth: 12
             }
-        });
-
-        // Pie Chart
-        const pieCtx = document.getElementById('pieChart').getContext('2d');
-
-        const purposes = ['Groceries', 'Rent', 'Utilities', 'Entertainment', 'Travel'];
-        const purposeAmounts = [1200, 3500, 800, 1500, 2000];
-
-        new Chart(pieCtx, {
-            type: 'pie',
-            data: {
-                labels: purposes,
-                datasets: [{
-                    label: 'Amount by Purpose',
-                    data: purposeAmounts,
-                    backgroundColor: [
-                        'rgba(255, 99, 132, 0.7)',
-                        'rgba(54, 162, 235, 0.7)',
-                        'rgba(255, 206, 86, 0.7)',
-                        'rgba(75, 192, 192, 0.7)',
-                        'rgba(153, 102, 255, 0.7)'
-                    ],
-                    borderColor: [
-                        'rgba(255, 99, 132, 1)',
-                        'rgba(54, 162, 235, 1)',
-                        'rgba(255, 206, 86, 1)',
-                        'rgba(75, 192, 192, 1)',
-                        'rgba(153, 102, 255, 1)'
-                    ],
-                    borderWidth: 1
-                }]
-            },
-            options: {
-                responsive: true,
-                plugins: {
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return `${context.label}: ₹${context.parsed.toLocaleString()}`;
-                            }
-                        }
-                    },
-                    legend: {
-                        position: 'bottom'
-                    }
-                }
-            }
-        });
-    </script>
-</body>
-</html>
+          }
+        }
+      }
+    });
+  });
+</script>

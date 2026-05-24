@@ -1,123 +1,105 @@
-<!DOCTYPE html>
-<html lang="en" class="h-100">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Echopay - Sign Up</title>
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="/css/style.css">
-</head>
-<body class="d-flex flex-column h-100">
-    <!-- Include the navbar -->
-    <%- include('./layout/navbar.ejs') %>
-    
-    <!-- Main content -->
-    <main class="flex-grow-1 py-5">
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="col-md-8 col-lg-6">
-                    <div class="card shadow">
-                        <div class="card-body p-4">
-                            <h2 class="text-center mb-4 text-primary">Create Your Account</h2>
-                            <p class="text-center text-muted mb-4">Join Echopay for secure and fast payment solutions</p>
-                            
-                            <form action="/signup" method="POST">
-                                <div class="mb-3">
-                                    <label for="username" class="form-label">Username</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="bi bi-person"></i></span>
-                                        <input type="text" class="form-control" id="username" name="username" placeholder="Choose a username" required>
-                                    </div>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="email" class="form-label">Email Address</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                                        <input type="email" class="form-control" id="email" name="email" placeholder="Your email address" required>
-                                    </div>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="password" class="form-label">Password</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="bi bi-lock"></i></span>
-                                        <input type="password" class="form-control" id="password" name="password" 
-                                               placeholder="Create a strong password" 
-                                               pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}" 
-                                               title="Must contain at least one number, one uppercase and lowercase letter, and at least 8 characters"
-                                               required>
-                                    </div>
-                                    <div class="form-text">Password must be at least 8 characters with numbers, uppercase and lowercase letters.</div>
-                                </div>
-                                
-                                <div class="mb-3">
-                                    <label for="confirmPassword" class="form-label">Confirm Password</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="bi bi-lock-fill"></i></span>
-                                        <input type="password" class="form-control" id="confirmPassword" name="confirmPassword" 
-                                               placeholder="Confirm your password" required>
-                                    </div>
-                                </div>
-                                
-                                <div class="mb-4">
-                                    <label for="initialAmount" class="form-label">Initial Account Balance ($)</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text"><i class="bi bi-cash"></i></span>
-                                        <input type="number" class="form-control" id="initialAmount" name="initialAmount" 
-                                               placeholder="Initial deposit amount" min="0" step="0.01" required>
-                                    </div>
-                                    <div class="form-text">Enter the amount you'd like to start your account with.</div>
-                                </div>
-                                
-                                <div class="mb-3 form-check">
-                                    <input type="checkbox" class="form-check-input" id="termsAgree" name="termsAgree" required>
-                                    <label class="form-check-label" for="termsAgree">
-                                        I agree to the <a href="/terms" target="_blank">Terms of Service</a> and <a href="/privacy" target="_blank">Privacy Policy</a>
-                                    </label>
-                                </div>
-                                
-                                <div class="d-grid gap-2">
-                                    <button type="submit" class="btn btn-primary btn-lg">Create Account</button>
-                                </div>
-                            </form>
-                            
-                            <div class="text-center mt-4">
-                                <p>Already have an account? <a href="/auth/login">Log in</a></p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6 col-xl-5">
+      <div class="glass-card p-4 shadow-lg">
+        <div class="text-center mb-4">
+          <h2 class="fw-bold mb-1">Create Account</h2>
+          <p class="text-secondary small">Join EchoPay for secure visual financial tracking</p>
         </div>
-    </main>
+
+        <% if (errors && errors.length > 0) { %>
+          <div class="alert alert-danger border-0 rounded-3 bg-danger-subtle text-danger py-2.5 px-3 mb-4">
+            <div class="d-flex align-items-center mb-2 fw-semibold small">
+              <i class="bi bi-exclamation-octagon-fill me-2"></i>Please resolve the following errors:
+            </div>
+            <ul class="mb-0 ps-3 small">
+              <% errors.forEach(err => { %>
+                <li><%= err.msg %></li>
+              <% }) %>
+            </ul>
+          </div>
+        <% } %>
+
+        <form action="/signup" method="POST">
+          <div class="mb-3">
+            <label for="username" class="form-label small fw-bold">Username</label>
+            <div class="input-group">
+              <span class="input-group-text bg-body-tertiary border-end-0"><i class="bi bi-person text-muted"></i></span>
+              <input type="text" class="form-control border-start-0 ps-0 bg-body-tertiary" id="username" name="username" 
+                     placeholder="Choose a username" value="<%= formData.username || '' %>" required>
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <label for="email" class="form-label small fw-bold">Email Address</label>
+            <div class="input-group">
+              <span class="input-group-text bg-body-tertiary border-end-0"><i class="bi bi-envelope text-muted"></i></span>
+              <input type="email" class="form-control border-start-0 ps-0 bg-body-tertiary" id="email" name="email" 
+                     placeholder="email@example.com" value="<%= formData.email || '' %>" required>
+            </div>
+          </div>
+          
+          <div class="mb-3">
+            <label for="password" class="form-label small fw-bold">Password</label>
+            <div class="input-group">
+              <span class="input-group-text bg-body-tertiary border-end-0"><i class="bi bi-lock text-muted"></i></span>
+              <input type="password" class="form-control border-start-0 ps-0 bg-body-tertiary" id="password" name="password" 
+                     placeholder="Create a strong password" required>
+            </div>
+            <div class="form-text small text-secondary">Must be 8+ characters, with at least 1 uppercase letter and 1 number.</div>
+          </div>
+          
+          <div class="mb-3">
+            <label for="confirmPassword" class="form-label small fw-bold">Confirm Password</label>
+            <div class="input-group">
+              <span class="input-group-text bg-body-tertiary border-end-0"><i class="bi bi-shield-check text-muted"></i></span>
+              <input type="password" class="form-control border-start-0 ps-0 bg-body-tertiary" id="confirmPassword" name="confirmPassword" 
+                     placeholder="Verify your password" required>
+            </div>
+          </div>
+          
+          <div class="mb-4">
+            <label for="initialAmount" class="form-label small fw-bold">Initial Account Balance (₹)</label>
+            <div class="input-group">
+              <span class="input-group-text bg-body-tertiary border-end-0"><i class="bi bi-currency-rupee text-muted"></i></span>
+              <input type="number" class="form-control border-start-0 ps-0 bg-body-tertiary" id="initialAmount" name="initialAmount" 
+                     placeholder="e.g. 5000" min="0" step="0.01" value="<%= formData.initialAmount || '' %>" required>
+            </div>
+            <div class="form-text small text-secondary">Set up your initial deposit amount to begin.</div>
+          </div>
+          
+          <div class="mb-4 form-check">
+            <input type="checkbox" class="form-check-input" id="termsAgree" name="termsAgree" required>
+            <label class="form-check-label text-secondary small" for="termsAgree">
+              I agree to the <a href="#" class="text-gradient-primary fw-bold text-decoration-none">Terms of Service</a> & <a href="#" class="text-gradient-primary fw-bold text-decoration-none">Privacy Policy</a>
+            </label>
+          </div>
+          
+          <button type="submit" class="btn btn-primary w-100 py-2.5">Create Account</button>
+        </form>
+
+        <div class="text-center mt-4">
+          <p class="small text-secondary mb-0">Already have an account? <a href="/login" class="text-gradient-primary fw-bold text-decoration-none">Log in</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const password = document.getElementById('password');
+    const confirmPassword = document.getElementById('confirmPassword');
     
-    <!-- Include the footer -->
-    <%- include('./layout/footer.ejs') %>
+    function validatePassword() {
+      if (password.value !== confirmPassword.value) {
+        confirmPassword.setCustomValidity("Passwords don't match");
+      } else {
+        confirmPassword.setCustomValidity('');
+      }
+    }
     
-    <!-- Bootstrap JS Bundle with Popper -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- Password validation script -->
-    <script>
-        // Check if passwords match
-        const password = document.getElementById('password');
-        const confirmPassword = document.getElementById('confirmPassword');
-        
-        function validatePassword() {
-            if (password.value !== confirmPassword.value) {
-                confirmPassword.setCustomValidity("Passwords don't match");
-            } else {
-                confirmPassword.setCustomValidity('');
-            }
-        }
-        
-        password.onchange = validatePassword;
-        confirmPassword.onkeyup = validatePassword;
-    </script>
-</body>
-</html>
+    password.addEventListener('change', validatePassword);
+    confirmPassword.addEventListener('keyup', validatePassword);
+  });
+</script>
