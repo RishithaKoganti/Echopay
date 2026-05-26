@@ -13,6 +13,9 @@ require('dotenv').config();
 
 const port = process.env.PORT || 5003;
 
+// Trust proxy for secure cookies behind reverse proxies (like Vercel)
+app.set('trust proxy', 1);
+
 // Body Parsers
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
